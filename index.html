@@ -553,10 +553,10 @@
             <footer class="footer container">
                 <div class="footer-cta">
                     <h2>Ready to<br>Partner?</h2>
-                    <button class="btn-glitch">Sponsor Us</button>
+                    <button class="btn-glitch" onclick="window.location.href='mailto:teamoreshnk@gmail.com'">Sponsor Us</button>
                 </div>
                 <div class="team-info">
-                    <p>Presented by: <strong>Shreyas Raj</strong></p>
+                    <p>Presented by: <strong>B. Shree Shreyas Raj</strong></p>
                     <p>&copy; 2026 ORESHNK Robotics</p>
                 </div>
             </footer>
@@ -724,21 +724,21 @@
         const robotGroup = new THREE.Group();
         scene.add(robotGroup);
 
-        // Chassis
+        // Chassis (Updated with transparency)
         const bodyGeo = new THREE.BoxGeometry(1, 0.3, 1.5);
-        const bodyMat = new THREE.MeshBasicMaterial({ color: 0x222222, wireframe: true });
+        const bodyMat = new THREE.MeshBasicMaterial({ color: 0x222222, wireframe: true, transparent: true, opacity: 1 });
         const body = new THREE.Mesh(bodyGeo, bodyMat);
         robotGroup.add(body);
 
-        // Solid inner body (to block grid)
+        // Solid inner body (Updated with transparency)
         const innerBodyGeo = new THREE.BoxGeometry(0.9, 0.25, 1.4);
-        const innerBodyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const innerBodyMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
         const innerBody = new THREE.Mesh(innerBodyGeo, innerBodyMat);
         robotGroup.add(innerBody);
 
-        // Wheels
+        // Wheels (Updated with transparency)
         const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
-        const wheelMat = new THREE.MeshBasicMaterial({ color: 0x444444, wireframe: true });
+        const wheelMat = new THREE.MeshBasicMaterial({ color: 0x444444, wireframe: true, transparent: true, opacity: 1 });
         
         const w1 = new THREE.Mesh(wheelGeo, wheelMat);
         w1.rotation.z = Math.PI / 2;
@@ -757,9 +757,9 @@
         w4.position.set(-0.6, 0, -0.5);
         robotGroup.add(w4);
 
-        // Sensors (Eyes)
+        // Sensors (Eyes) (Updated with transparency)
         const sensorGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-        const sensorMat = new THREE.MeshBasicMaterial({ color: 0xFF3B00 });
+        const sensorMat = new THREE.MeshBasicMaterial({ color: 0xFF3B00, transparent: true, opacity: 1 });
         
         const s1 = new THREE.Mesh(sensorGeo, sensorMat);
         s1.position.set(0.2, 0.2, -0.75);
@@ -774,51 +774,72 @@
         
         // Helper vars
         const clock = new THREE.Clock();
-        let scrollProgress = 0;
         const totalScrollHeight = document.body.scrollHeight - window.innerHeight;
 
         function updateRobotPosition() {
-            // Calculate scroll percentage (0 to 1)
-            // Lenis gives us the current scroll value
-            // We need to account for the massive roadmap section
+            // SAFEGUARD: Ensure Lenis is ready and we have scrolling height
             const maxScroll = document.body.scrollHeight - window.innerHeight;
-            let u = lenis.scroll / maxScroll;
+            if (maxScroll <= 0) return;
+
+            // Get scroll position: prioritize Lenis, fallback to window
+            let scrollPos = 0;
+            if (typeof lenis !== 'undefined' && typeof lenis.scroll === 'number' && !isNaN(lenis.scroll)) {
+                scrollPos = lenis.scroll;
+            } else {
+                scrollPos = window.scrollY || 0;
+            }
+
+            // Calculate u
+            let u = scrollPos / maxScroll;
             
-            // Clamp u between 0 and 1 (mostly 0.99 to avoid error at end)
+            // Validate u to prevent NaN/Infinity
+            if (isNaN(u) || !isFinite(u)) u = 0;
+
+            // Clamp u safely between 0 and 0.99
             u = Math.min(Math.max(u, 0), 0.99);
 
             // Get point on curve
             const position = curve.getPointAt(u);
-            const lookAtPosition = curve.getPointAt(Math.min(u + 0.01, 1));
-
-            // Move Robot
-            robotGroup.position.copy(position);
-            robotGroup.lookAt(lookAtPosition);
-
-            // Rotate Wheels based on movement
-            const time = clock.getElapsedTime();
-            // Simple rotation simulation
-            w1.rotation.x = -lenis.scroll * 0.05;
-            w2.rotation.x = -lenis.scroll * 0.05;
-            w3.rotation.x = -lenis.scroll * 0.05;
-            w4.rotation.x = -lenis.scroll * 0.05;
-
-            // Camera Follow Logic (Third Person Chase)
-            // Calculate a camera offset relative to the robot's orientation
-            // We want the camera Behind and Above
             
-            // 1. Get direction vector
-            const tangent = curve.getTangentAt(u).normalize();
-            
-            // 2. Determine offset vector (Behind: -tangent, Up: Y)
-            const cameraOffset = tangent.clone().multiplyScalar(-4).add(new THREE.Vector3(0, 2, 0));
-            
-            // 3. Apply offset to robot position
-            const desiredCameraPos = position.clone().add(cameraOffset);
+            // Look ahead logic (clamped)
+            let lookAheadU = u + 0.01;
+            if (lookAheadU > 1) lookAheadU = 1;
 
-            // 4. Smoothly interpolate camera position for that "cinematic" feel
-            camera.position.lerp(desiredCameraPos, 0.1);
-            camera.lookAt(position);
+            const lookAtPosition = curve.getPointAt(lookAheadU);
+
+            if (position && lookAtPosition) {
+                // Move Robot
+                robotGroup.position.copy(position);
+                robotGroup.lookAt(lookAtPosition);
+                
+                // Camera Follow Logic
+                const tangent = curve.getTangentAt(u).normalize();
+                const cameraOffset = tangent.clone().multiplyScalar(-4).add(new THREE.Vector3(0, 2, 0));
+                const desiredCameraPos = position.clone().add(cameraOffset);
+                camera.position.lerp(desiredCameraPos, 0.1);
+                camera.lookAt(position);
+            }
+
+            // Rotate Wheels
+            w1.rotation.x = -scrollPos * 0.05;
+            w2.rotation.x = -scrollPos * 0.05;
+            w3.rotation.x = -scrollPos * 0.05;
+            w4.rotation.x = -scrollPos * 0.05;
+
+            // FADE LOGIC
+            const fadeStart = 0.85; 
+            const fadeEnd = 0.95;
+            let currentOpacity = 1;
+
+            if (u > fadeStart) {
+                currentOpacity = 1 - (u - fadeStart) / (fadeEnd - fadeStart);
+                currentOpacity = Math.max(0, currentOpacity); 
+            }
+
+            bodyMat.opacity = currentOpacity;
+            innerBodyMat.opacity = currentOpacity;
+            wheelMat.opacity = currentOpacity;
+            sensorMat.opacity = currentOpacity;
         }
 
         function animate() {
