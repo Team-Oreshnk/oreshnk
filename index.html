@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORESHNK | Manipal University Jaipur</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --c-bg: #050505;
+            --c-text: #E0E0E0;
+            --c-accent: #FF3B00; /* Safety Orange */
+            --c-dark-accent: #330c00;
+            --c-metal: #555555;
+            
+            --f-head: 'Syncopate', sans-serif;
+            --f-body: 'Space Grotesk', sans-serif;
+            
+            --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--c-bg);
+            color: var(--c-text);
+            font-family: var(--f-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--c-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--c-accent);
+        }
+
+        /* Canvas Background */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            /* opacity: 0.6; Removed opacity to make the robot pop */
+            pointer-events: none;
+        }
+
+        /* Noise Overlay */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABMTExERERmZmYzMzMyMjJ4F772AAAACHRSTlMAMwAqzMzMzMwp34QAAAABYktHRACIBR1IAAAAJklEQVQ4y2NgQQNMDIy4BKh8RgX8CnA+I4yClA+nIDzf0cCHUwAAUEwF5784P6cAAAAASUVORK5CYII=');
+        }
+
+        /* Preloader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--c-accent);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .loader-text {
+            font-family: var(--f-head);
+            font-weight: 700;
+            font-size: 4vw;
+            color: black;
+            text-transform: uppercase;
+        }
+
+        /* Typography Utilities */
+        .t-hero {
+            font-family: var(--f-head);
+            font-weight: 700;
+            font-size: 9vw;
+            line-height: 0.85;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            color: white;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Added shadow for readability over 3D */
+        }
+        
+        .t-sub {
+            font-family: var(--f-body);
+            font-size: 1.5rem;
+            color: var(--c-accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: block;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .outline-text {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            color: transparent;
+            transition: all 0.3s;
+        }
+        .outline-text:hover {
+            -webkit-text-stroke: 1px var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        /* Layout */
+        section {
+            position: relative;
+            padding: 10vh 5vw;
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* HERO */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 15vh;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            z-index: 2;
+            mix-blend-mode: normal; /* Changed from exclusion for better visibility */
+        }
+
+        .hero-line {
+            overflow: hidden;
+        }
+        
+        .hero-line h1 {
+            transform: translateY(100%);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            right: 5vw;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .scroll-text {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        .scroll-line {
+            width: 60px;
+            height: 2px;
+            background: var(--c-accent);
+        }
+
+        /* ABOUT */
+        .about {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4); /* Slight backing for text readability */
+            backdrop-filter: blur(5px);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 5vw;
+        }
+
+        .about-text p {
+            font-size: clamp(1.5rem, 3vw, 3rem);
+            line-height: 1.2;
+            font-weight: 300;
+        }
+
+        .highlight {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        /* DOMAINS */
+        .domains {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+        }
+        
+        .domain-item {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 4vw 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            cursor: none;
+        }
+        
+        .domain-item:hover {
+            background: rgba(255, 59, 0, 0.1);
+        }
+
+        .domain-index {
+            font-family: var(--f-head);
+            font-size: 1.5rem;
+            color: var(--c-metal);
+        }
+        
+        .domain-name {
+            font-family: var(--f-head);
+            font-size: 4vw;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .domain-desc {
+            max-width: 300px;
+            text-align: right;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            display: none;
+        }
+        
+        @media(min-width: 768px) {
+            .domain-desc { display: block; }
+        }
+
+        /* HORIZONTAL ROADMAP */
+        .roadmap-section {
+            height: 500vh; /* Determines scroll length */
+            position: relative;
+        }
+
+        .roadmap-container {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* background: var(--c-bg); REMOVED BG TO SEE ROBOT */
+            background: rgba(3,3,3,0.3); /* Translucent */
+            border-top: 1px solid var(--c-accent);
+            border-bottom: 1px solid var(--c-accent);
+            backdrop-filter: blur(2px);
+        }
+
+        .roadmap-title {
+            position: absolute;
+            top: 5vh;
+            left: 5vw;
+            z-index: 10;
+        }
+
+        .roadmap-track {
+            display: flex;
+            gap: 10vw;
+            padding-left: 5vw;
+            padding-right: 50vw; /* End spacing */
+            width: max-content;
+        }
+
+        .event-card {
+            width: 400px;
+            flex-shrink: 0;
+            position: relative;
+            background: rgba(20,20,20,0.8);
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .event-date {
+            font-family: var(--f-head);
+            color: var(--c-accent);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .event-name {
+            font-size: 3rem;
+            line-height: 1;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .event-loc {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            width: fit-content;
+            border-radius: 50px;
+        }
+
+        .event-flag {
+            filter: grayscale(1);
+        }
+
+        /* PRIZE POOL */
+        .prize-section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            background: var(--c-accent);
+            color: black;
+            clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 90%);
+            margin-top: -10vh;
+            z-index: 5;
+            position: relative;
+        }
+
+        .prize-amount {
+            font-family: var(--f-head);
+            font-size: 12vw;
+            font-weight: 700;
+            line-height: 0.9;
+        }
+
+        .prize-label {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 10vh 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            background: #000;
+        }
+
+        .footer-cta h2 {
+            font-size: 5vw;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 2rem;
+        }
+
+        .btn-glitch {
+            background: transparent;
+            border: 1px solid var(--c-text);
+            color: var(--c-text);
+            padding: 20px 40px;
+            font-family: var(--f-head);
+            text-transform: uppercase;
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .btn-glitch:hover {
+            background: var(--c-accent);
+            border-color: var(--c-accent);
+            color: black;
+        }
+
+        .team-info {
+            text-align: right;
+            opacity: 0.5;
+        }
+
+        /* Utility */
+        .skew-on-scroll {
+            transform-origin: center;
+            will-change: transform;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Noise Overlay -->
+    <div class="noise"></div>
+
+    <!-- WebGL Background -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Preloader -->
+    <div class="loader">
+        <div class="loader-text">ORESHNK<span style="color:white">.SYS</span></div>
+    </div>
+
+    <div class="smooth-wrapper">
+        <div class="smooth-content">
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content container">
+                    <span class="t-sub">Manipal University Jaipur</span>
+                    <div class="hero-line">
+                        <h1 class="t-hero">Constructing</h1>
+                    </div>
+                    <div class="hero-line">
+                        <h1 class="t-hero outline-text">The Future</h1>
+                    </div>
+                    <div class="hero-line">
+                        <h1 class="t-hero" style="color: var(--c-accent)">Of Robotics</h1>
+                    </div>
+                </div>
+                <div class="scroll-indicator">
+                    <span class="scroll-text">Scroll to Drive</span>
+                    <div class="scroll-line"></div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="about container">
+                <div class="about-grid">
+                    <div class="about-label t-sub">Our Mission</div>
+                    <div class="about-text skew-on-scroll">
+                        <p>We don't just study engineering; <span class="highlight">we build it.</span></p>
+                        <br>
+                        <p>We are ORESHNK. A robotics initiative focused on the gritty details—custom hardware, embedded systems, and mechanical design. We exist to dominate the national stage.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Domains -->
+            <section class="domains">
+                <div class="domain-item">
+                    <span class="domain-index">01</span>
+                    <h2 class="domain-name">Hardware</h2>
+                    <p class="domain-desc">Robust mechanical structures designed for high-stress combat and navigation.</p>
+                </div>
+                <div class="domain-item">
+                    <span class="domain-index">02</span>
+                    <h2 class="domain-name">Electronics</h2>
+                    <p class="domain-desc">Custom PCB design and power management systems for peak performance.</p>
+                </div>
+                <div class="domain-item">
+                    <span class="domain-index">03</span>
+                    <h2 class="domain-name">Embedded</h2>
+                    <p class="domain-desc">Low-level programming and real-time control algorithms.</p>
+                </div>
+            </section>
+
+            <!-- Horizontal Roadmap -->
+            <section class="roadmap-section" id="roadmap">
+                <div class="roadmap-container">
+                    <div class="roadmap-title t-sub">2026 Season Roadmap</div>
+                    <div class="roadmap-track">
+                        
+                        <!-- Event 1 -->
+                        <div class="event-card">
+                            <div class="event-date">March 2026</div>
+                            <h3 class="event-name">Techkriti</h3>
+                            <div class="event-loc">IIT Kanpur</div>
+                        </div>
+
+                        <!-- Event 2 -->
+                        <div class="event-card">
+                            <div class="event-date">April 2026</div>
+                            <h3 class="event-name">Zonals</h3>
+                            <div class="event-loc">Technoxian</div>
+                        </div>
+
+                        <!-- Event 3 -->
+                        <div class="event-card">
+                            <div class="event-date">May 2026</div>
+                            <h3 class="event-name">Nationals</h3>
+                            <div class="event-loc">Technoxian R2</div>
+                        </div>
+
+                        <!-- Event 4 -->
+                        <div class="event-card">
+                            <div class="event-date">June 2026</div>
+                            <h3 class="event-name">WRO Qualifiers</h3>
+                            <div class="event-loc">India</div>
+                        </div>
+
+                        <!-- Event 5 -->
+                        <div class="event-card">
+                            <div class="event-date">October 2026</div>
+                            <h3 class="event-name" style="color:var(--c-accent)">World Finals</h3>
+                            <div class="event-loc">🇦🇪 UAE (Technoxian)</div>
+                        </div>
+
+                        <!-- Event 6 -->
+                        <div class="event-card">
+                            <div class="event-date">Dec 2026</div>
+                            <h3 class="event-name" style="color:var(--c-accent)">WRO Global</h3>
+                            <div class="event-loc">🇵🇷 Puerto Rico</div>
+                        </div>
+
+                        <!-- Event 7 -->
+                        <div class="event-card">
+                            <div class="event-date">Dec 2026</div>
+                            <h3 class="event-name">Techfest</h3>
+                            <div class="event-loc">IIT Bombay</div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Prize Pool -->
+            <section class="prize-section">
+                <span class="prize-label">Projected Prize Pool</span>
+                <div class="prize-amount">₹10L+</div>
+                <span class="prize-label">Targeting Victory</span>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer container">
+                <div class="footer-cta">
+                    <h2>Ready to<br>Partner?</h2>
+                    <button class="btn-glitch">Sponsor Us</button>
+                </div>
+                <div class="team-info">
+                    <p>Presented by: <strong>Shreyas Raj</strong></p>
+                    <p>&copy; 2026 ORESHNK Robotics</p>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        // --- 1. PRELOADER ---
+        window.addEventListener('load', () => {
+            const timeline = gsap.timeline();
+            
+            timeline.to('.loader-text', {
+                duration: 0.5,
+                opacity: 0,
+                delay: 0.5
+            })
+            .to('.loader', {
+                duration: 0.8,
+                clipPath: 'polygon(0 0, 100% 0, 100% 0%, 0% 0%)',
+                ease: 'power4.inOut'
+            })
+            .to('.hero-line h1', {
+                y: 0,
+                duration: 1,
+                stagger: 0.1,
+                ease: 'power3.out'
+            }, "-=0.4");
+        });
+
+        // --- 2. SMOOTH SCROLL (LENIS) ---
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // --- 3. GSAP ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Skew effect on scroll
+        let proxy = { skew: 0 },
+            skewSetter = gsap.quickSetter(".skew-on-scroll", "skewY", "deg"),
+            clamp = gsap.utils.clamp(-20, 20);
+
+        ScrollTrigger.create({
+            onUpdate: (self) => {
+                let skew = clamp(self.getVelocity() / -300);
+                if (Math.abs(skew) > Math.abs(proxy.skew)) {
+                    proxy.skew = skew;
+                    gsap.to(proxy, {
+                        skew: 0,
+                        duration: 0.8,
+                        ease: "power3",
+                        overwrite: true,
+                        onUpdate: () => skewSetter(proxy.skew)
+                    });
+                }
+            }
+        });
+
+        // Horizontal Roadmap Scroll
+        const roadmapSection = document.querySelector('.roadmap-section');
+        const roadmapTrack = document.querySelector('.roadmap-track');
+
+        gsap.to(roadmapTrack, {
+            x: () => -(roadmapTrack.scrollWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+                trigger: roadmapSection,
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+                invalidateOnRefresh: true
+            }
+        });
+
+        // Domain Hover Effect
+        const domains = document.querySelectorAll('.domain-item');
+        domains.forEach(domain => {
+            domain.addEventListener('mouseenter', () => {
+                gsap.to(domain.querySelector('.domain-name'), {
+                    x: 20,
+                    color: '#FF3B00',
+                    duration: 0.3
+                });
+            });
+            domain.addEventListener('mouseleave', () => {
+                gsap.to(domain.querySelector('.domain-name'), {
+                    x: 0,
+                    color: '#E0E0E0',
+                    duration: 0.3
+                });
+            });
+        });
+
+        // --- 4. THREE.JS ROBOT & LINE FOLLOWER ---
+        const canvas = document.querySelector('#webgl-canvas');
+        const scene = new THREE.Scene();
+        // Add fog for depth
+        scene.fog = new THREE.FogExp2(0x050505, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // --- A. THE GRID FLOOR ---
+        const gridHelper = new THREE.GridHelper(200, 100, 0x333333, 0x111111);
+        gridHelper.position.y = -2;
+        scene.add(gridHelper);
+
+        // --- B. THE LINE (PATH) ---
+        // Create a winding path that goes deep into Z
+        const curvePoints = [
+            new THREE.Vector3(0, -1, 5),     // Start close
+            new THREE.Vector3(0, -1, -10),
+            new THREE.Vector3(5, -1, -20),   // Turn Right
+            new THREE.Vector3(-5, -1, -40),  // Turn Left
+            new THREE.Vector3(0, -1, -60),   // Center
+            new THREE.Vector3(8, 2, -80),    // Go Up (Ramp)
+            new THREE.Vector3(0, 0, -100),   // Down
+            new THREE.Vector3(-10, -1, -120),
+            new THREE.Vector3(0, -1, -150)   // End
+        ];
+
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+        curve.tension = 0.5;
+
+        // Visual Tube for the Line
+        const tubeGeometry = new THREE.TubeGeometry(curve, 100, 0.1, 8, false);
+        const tubeMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xFF3B00,
+            wireframe: true // Tech look
+        });
+        const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        scene.add(tubeMesh);
+        
+        // Inner glowing core of the line
+        const coreGeometry = new THREE.TubeGeometry(curve, 100, 0.03, 8, false);
+        const coreMaterial = new THREE.MeshBasicMaterial({ color: 0xFFAA00 });
+        const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+        scene.add(coreMesh);
+
+
+        // --- C. THE ROBOT ---
+        const robotGroup = new THREE.Group();
+        scene.add(robotGroup);
+
+        // Chassis
+        const bodyGeo = new THREE.BoxGeometry(1, 0.3, 1.5);
+        const bodyMat = new THREE.MeshBasicMaterial({ color: 0x222222, wireframe: true });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        robotGroup.add(body);
+
+        // Solid inner body (to block grid)
+        const innerBodyGeo = new THREE.BoxGeometry(0.9, 0.25, 1.4);
+        const innerBodyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const innerBody = new THREE.Mesh(innerBodyGeo, innerBodyMat);
+        robotGroup.add(innerBody);
+
+        // Wheels
+        const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+        const wheelMat = new THREE.MeshBasicMaterial({ color: 0x444444, wireframe: true });
+        
+        const w1 = new THREE.Mesh(wheelGeo, wheelMat);
+        w1.rotation.z = Math.PI / 2;
+        w1.position.set(0.6, 0, 0.5);
+        robotGroup.add(w1);
+
+        const w2 = w1.clone();
+        w2.position.set(-0.6, 0, 0.5);
+        robotGroup.add(w2);
+
+        const w3 = w1.clone();
+        w3.position.set(0.6, 0, -0.5);
+        robotGroup.add(w3);
+
+        const w4 = w1.clone();
+        w4.position.set(-0.6, 0, -0.5);
+        robotGroup.add(w4);
+
+        // Sensors (Eyes)
+        const sensorGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const sensorMat = new THREE.MeshBasicMaterial({ color: 0xFF3B00 });
+        
+        const s1 = new THREE.Mesh(sensorGeo, sensorMat);
+        s1.position.set(0.2, 0.2, -0.75);
+        robotGroup.add(s1);
+
+        const s2 = s1.clone();
+        s2.position.set(-0.2, 0.2, -0.75);
+        robotGroup.add(s2);
+
+
+        // --- D. ANIMATION LOOP ---
+        
+        // Helper vars
+        const clock = new THREE.Clock();
+        let scrollProgress = 0;
+        const totalScrollHeight = document.body.scrollHeight - window.innerHeight;
+
+        function updateRobotPosition() {
+            // Calculate scroll percentage (0 to 1)
+            // Lenis gives us the current scroll value
+            // We need to account for the massive roadmap section
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+            let u = lenis.scroll / maxScroll;
+            
+            // Clamp u between 0 and 1 (mostly 0.99 to avoid error at end)
+            u = Math.min(Math.max(u, 0), 0.99);
+
+            // Get point on curve
+            const position = curve.getPointAt(u);
+            const lookAtPosition = curve.getPointAt(Math.min(u + 0.01, 1));
+
+            // Move Robot
+            robotGroup.position.copy(position);
+            robotGroup.lookAt(lookAtPosition);
+
+            // Rotate Wheels based on movement
+            const time = clock.getElapsedTime();
+            // Simple rotation simulation
+            w1.rotation.x = -lenis.scroll * 0.05;
+            w2.rotation.x = -lenis.scroll * 0.05;
+            w3.rotation.x = -lenis.scroll * 0.05;
+            w4.rotation.x = -lenis.scroll * 0.05;
+
+            // Camera Follow Logic (Third Person Chase)
+            // Calculate a camera offset relative to the robot's orientation
+            // We want the camera Behind and Above
+            
+            // 1. Get direction vector
+            const tangent = curve.getTangentAt(u).normalize();
+            
+            // 2. Determine offset vector (Behind: -tangent, Up: Y)
+            const cameraOffset = tangent.clone().multiplyScalar(-4).add(new THREE.Vector3(0, 2, 0));
+            
+            // 3. Apply offset to robot position
+            const desiredCameraPos = position.clone().add(cameraOffset);
+
+            // 4. Smoothly interpolate camera position for that "cinematic" feel
+            camera.position.lerp(desiredCameraPos, 0.1);
+            camera.lookAt(position);
+        }
+
+        function animate() {
+            updateRobotPosition();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>
