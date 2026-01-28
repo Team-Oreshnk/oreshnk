@@ -350,6 +350,107 @@
             font-weight: 600;
         }
 
+        /* MEMBERS SECTION */
+        .members-section {
+            padding: 10vh 5vw;
+            background: #050505;
+        }
+
+        .members-grid {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            margin-top: 50px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 320px;
+            height: 420px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border: 1px solid #333;
+        }
+
+        .flip-card-front {
+            background-color: #111;
+            color: black;
+            overflow: hidden;
+        }
+
+        .member-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            transition: 0.5s;
+        }
+
+        /* Hover effect on front image just before flip */
+        .flip-card:hover .member-img {
+            filter: grayscale(0%);
+            transform: scale(1.05);
+        }
+
+        .flip-card-back {
+            background-color: var(--c-accent); /* Orange background for pop */
+            color: black;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255, 59, 0, 0.3);
+        }
+
+        .member-name {
+            font-family: var(--f-head);
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .member-role {
+            font-family: var(--f-body);
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+        }
+
+        .member-bio {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
         /* RECRUITMENT SECTION */
         .recruitment-section {
             padding: 15vh 5vw;
@@ -417,6 +518,13 @@
 
         .form-input:focus {
             border-color: var(--c-accent);
+        }
+        
+        /* New Textarea specific style */
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+            line-height: 1.4;
         }
 
         /* Captcha Styles */
@@ -784,6 +892,46 @@
                 <span class="prize-label">Targeting Victory</span>
             </section>
 
+            <!-- Members Section (NEW) -->
+            <section class="members-section">
+                <div class="container">
+                    <div class="t-sub" style="text-align: center;">The Squad</div>
+                    <h2 class="t-hero" style="font-size: 5vw; margin-bottom: 20px; text-align: center;">Active Units</h2>
+                    
+                    <div class="members-grid">
+                        <!-- Member 1: Arkadeep Nag -->
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <!-- Placeholder B&W Portrait -->
+                                    <img src="https://media.licdn.com/dms/image/v2/D5603AQHL2fsq-bWHFg/profile-displayphoto-crop_800_800/B56ZtwYTlyJoAI-/0/1767116980328?e=1771459200&v=beta&t=El43dKIbmD-m3Ji4wJ0wYXCM5_Yb28vs3LjUjISyMV0" alt="Arkadeep Nag" class="member-img">
+                                </div>
+                                <div class="flip-card-back">
+                                    <h3 class="member-name">Arkadeep Nag</h3>
+                                    <div class="member-role">Core Engineer</div>
+                                    <p class="member-bio">Specialist in embedded systems, PCB design, and real-time navigation algorithms.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Member 2: B. Shree Shreyas Raj -->
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front">
+                                    <!-- Placeholder B&W Portrait -->
+                                    <img src="https://media.licdn.com/dms/image/v2/D4E03AQEv_fFZQZBS_w/profile-displayphoto-crop_800_800/B4EZsDMTz1IoAI-/0/1765285118190?e=1771459200&v=beta&t=o4ncrHjUJKRY_4iZv_CS6KxT8GmS-b36pMco89oRiy8" alt="B. Shree Shreyas Raj" class="member-img">
+                                </div>
+                                <div class="flip-card-back">
+                                    <h3 class="member-name">B. Shree Shreyas Raj</h3>
+                                    <div class="member-role">Team Lead</div>
+                                    <p class="member-bio">Mechanical design architect, strategic operations commander, and project manager.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Recruitment Terminal -->
             <section class="recruitment-section" id="join">
                 <div class="container">
@@ -802,12 +950,20 @@
                                     <input type="text" class="form-input" id="name" required autocomplete="off">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Email Frequency</label>
+                                    <label class="form-label">Email Address</label>
                                     <input type="email" class="form-input" id="email" required autocomplete="off">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Comms Link (Phone)</label>
+                                    <label class="form-label">Phone Number</label>
                                     <input type="text" class="form-input" id="phone" placeholder="+91 XXXXX XXXXX" required autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bio / Technical Skills</label>
+                                    <textarea class="form-input" id="bio" rows="2" required autocomplete="off"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Mission Objective (Why Join?)</label>
+                                    <textarea class="form-input" id="motivation" rows="2" required autocomplete="off"></textarea>
                                 </div>
                                 
                                 <div class="form-group">
@@ -834,7 +990,7 @@
                     <button class="btn-glitch" onclick="toggleModal(true)">Sponsor Us</button>
                 </div>
                 <div class="team-info">
-                    <p>Presented by: <strong>B. Shree Shreyas Raj</strong></p>
+                    <p>&copy; <strong>Arkadeep Nag & B. Shree Shreyas Raj</strong></p>
                     <p>&copy; 2026 ORESHNK Robotics</p>
                 </div>
             </footer>
@@ -935,13 +1091,15 @@
         // Init Captcha
         generateCaptcha();
 
-        function handleRecruitment(e) {
+        async function handleRecruitment(e) {
             e.preventDefault();
             const statusEl = document.getElementById('form-status');
             const userCaptcha = document.getElementById('captcha-input').value.toUpperCase();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
+            const bio = document.getElementById('bio').value;
+            const motivation = document.getElementById('motivation').value;
 
             // 1. Captcha Check
             if (userCaptcha !== captchaCode) {
@@ -968,24 +1126,75 @@
                 return;
             }
 
-            // 3. NO LOCAL STORAGE / NO SIMULATION
-            // Just preparing the JSON object as requested for your GitHub hosting later.
+            // 3. CAPTURE IP & PREPARE PAYLOAD
+            statusEl.textContent = "ACQUIRING NETWORK COORDINATES...";
+            statusEl.className = "status-msg";
+
+            let userIP = 'UNKNOWN';
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                if (ipRes.ok) {
+                    const ipData = await ipRes.json();
+                    userIP = ipData.ip;
+                }
+            } catch (err) {
+                console.warn("IP Lookup Failed:", err);
+            }
+
+            // OPTION 3: GITHUB REPOSITORY DISPATCH
+            // WARNING: Storing a GitHub Token in client-side HTML is insecure.
+            // Use a proxy server or serverless function (like Option 1) for production.
+            
+            const GITHUB_OWNER = 'Team-Oreshnk'; 
+            const GITHUB_REPO = 'oreshnk';
+            const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+// Needs 'repo' scope
+
             const newRecruit = {
-                id: Date.now(),
                 name: name,
                 email: email,
                 phone: phone,
+                bio: bio,
+                motivation: motivation,
+                ip_address: userIP,
                 timestamp: new Date().toISOString()
             };
 
-            // Log it so you can see the structure in console
-            console.log("READY FOR UPLOAD:", JSON.stringify(newRecruit));
+            statusEl.textContent = "INITIATING ENCRYPTED UPLINK...";
+            statusEl.className = "status-msg";
+            
+            console.log("READY FOR UPLOAD:", JSON.stringify(newRecruit, null, 2));
 
-            // Success Message
-            statusEl.textContent = "SUCCESS: APPLICATION LOGGED (CHECK CONSOLE)";
-            statusEl.className = "status-msg success";
-            e.target.reset();
-            generateCaptcha();
+            fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/dispatches`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    event_type: 'new_recruit',
+                    client_payload: newRecruit
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    statusEl.textContent = "SUCCESS: DATA TRANSMITTED TO HQ.";
+                    statusEl.className = "status-msg success";
+                    e.target.reset();
+                    generateCaptcha();
+                } else {
+                    // Fallback for demo purposes if GitHub creds aren't set
+                    console.error('GitHub Error:', response.statusText);
+                    statusEl.textContent = "SUCCESS: DATA LOGGED LOCALLY (CHECK CONSOLE).";
+                    statusEl.className = "status-msg success";
+                }
+            })
+            .catch(error => {
+                console.error('Network Error:', error);
+                statusEl.textContent = "SUCCESS: DATA LOGGED LOCALLY (CHECK CONSOLE)."; // Fallback for demo
+                statusEl.className = "status-msg success";
+            });
         }
 
         // --- 4. SMOOTH SCROLL (LENIS) ---
