@@ -364,12 +364,20 @@
             margin-top: 50px;
         }
 
+        .member-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            perspective: 1000px; /* Essential for 3D unfold */
+        }
+
         .flip-card {
             background-color: transparent;
             width: 320px;
             height: 420px;
             perspective: 1000px;
             cursor: pointer;
+            z-index: 2; /* Keep above scroll */
         }
 
         .flip-card-inner {
@@ -381,7 +389,9 @@
             transform-style: preserve-3d;
         }
 
-        .flip-card:hover .flip-card-inner {
+        /* Flip on Hover OR when Locked (Skills open) */
+        .flip-card:hover .flip-card-inner,
+        .flip-card.locked .flip-card-inner {
             transform: rotateY(180deg);
         }
 
@@ -449,6 +459,70 @@
             font-size: 0.95rem;
             line-height: 1.4;
             font-weight: 500;
+            margin-bottom: 25px;
+        }
+
+        /* Unroll Button */
+        .skill-toggle {
+            background: black;
+            color: var(--c-accent);
+            border: none;
+            padding: 10px 20px;
+            font-family: var(--f-head);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .skill-toggle:hover {
+            background: white;
+            color: black;
+        }
+
+        /* The Unrolling Scroll */
+        .skill-scroll {
+            width: 90%;
+            background: rgba(10,10,10,0.95);
+            border: 1px solid var(--c-accent);
+            border-top: none;
+            margin-top: -5px; /* slight overlap */
+            padding: 0 20px;
+            
+            /* Animation Props */
+            max-height: 0;
+            opacity: 0;
+            transform-origin: top;
+            transform: rotateX(-90deg); /* Start folded up */
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1; /* Below card */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .skill-scroll.active {
+            max-height: 400px;
+            opacity: 1;
+            transform: rotateX(0deg); /* Unfolded */
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .skill-tag {
+            background: rgba(255, 59, 0, 0.1);
+            border: 1px solid rgba(255, 59, 0, 0.3);
+            color: var(--c-text);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-family: var(--f-body);
+            border-radius: 4px;
         }
 
         /* RECRUITMENT SECTION */
@@ -900,34 +974,63 @@
                     
                     <div class="members-grid">
                         <!-- Member 1: Arkadeep Nag -->
-                        <div class="flip-card">
-                            <div class="flip-card-inner">
-                                <div class="flip-card-front">
-                                    <!-- Placeholder B&W Portrait -->
-                                    <img src="https://media.licdn.com/dms/image/v2/D5603AQHL2fsq-bWHFg/profile-displayphoto-crop_800_800/B56ZtwYTlyJoAI-/0/1767116980328?e=1771459200&v=beta&t=El43dKIbmD-m3Ji4wJ0wYXCM5_Yb28vs3LjUjISyMV0" alt="Arkadeep Nag" class="member-img">
+                        <div class="member-wrapper">
+                            <div class="flip-card">
+                                <div class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <!-- Placeholder B&W Portrait -->
+                                        <img src="https://media.licdn.com/dms/image/v2/D5603AQHL2fsq-bWHFg/profile-displayphoto-crop_800_800/B56ZtwYTlyJoAI-/0/1767116980328?e=1771459200&v=beta&t=El43dKIbmD-m3Ji4wJ0wYXCM5_Yb28vs3LjUjISyMV0" alt="Arkadeep Nag" class="member-img">
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <h3 class="member-name">Arkadeep Nag</h3>
+                                        <div class="member-role">Core Engineer</div>
+                                        <p class="member-bio">Specialist in embedded systems, PCB design, and real-time navigation algorithms.</p>
+                                        <button class="skill-toggle" onclick="toggleSkills(this)">ACCESS SKILLSET ▼</button>
+                                    </div>
                                 </div>
-                                <div class="flip-card-back">
-                                    <h3 class="member-name">Arkadeep Nag</h3>
-                                    <div class="member-role">Core Engineer</div>
-                                    <p class="member-bio">Specialist in embedded systems, PCB design, and real-time navigation algorithms.</p>
+                            </div>
+                            <!-- Unrolling Scroll -->
+                            <div class="skill-scroll">
+                                <div class="skill-list">
+                                    <span class="skill-tag">Embedded C</span>
+                                    <span class="skill-tag">RTOS</span>
+                                    <span class="skill-tag">PCB Design (Altium)</span>
+                                    <span class="skill-tag">Sensor Fusion</span>
+                                    <span class="skill-tag">Python/C++</span>
+                                    <span class="skill-tag">Circuit Analysis</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Member 2: B. Shree Shreyas Raj -->
-                        <div class="flip-card">
-                            <div class="flip-card-inner">
-                                <div class="flip-card-front">
-                                    <!-- Placeholder B&W Portrait -->
-                                    <img src="https://media.licdn.com/dms/image/v2/D4E03AQEv_fFZQZBS_w/profile-displayphoto-crop_800_800/B4EZsDMTz1IoAI-/0/1765285118190?e=1771459200&v=beta&t=o4ncrHjUJKRY_4iZv_CS6KxT8GmS-b36pMco89oRiy8" alt="B. Shree Shreyas Raj" class="member-img">
+                        <div class="member-wrapper">
+                            <div class="flip-card">
+                                <div class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <!-- Placeholder B&W Portrait -->
+                                        <img src="https://media.licdn.com/dms/image/v2/D4E03AQEv_fFZQZBS_w/profile-displayphoto-crop_800_800/B4EZsDMTz1IoAI-/0/1765285118190?e=1771459200&v=beta&t=o4ncrHjUJKRY_4iZv_CS6KxT8GmS-b36pMco89oRiy8" alt="B. Shree Shreyas Raj" class="member-img">
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <h3 class="member-name">B. Shree Shreyas Raj</h3>
+                                        <div class="member-role">Team Lead</div>
+                                        <p class="member-bio">Mechanical design architect, strategic operations commander, and project manager.</p>
+                                        <button class="skill-toggle" onclick="toggleSkills(this)">ACCESS SKILLSET ▼</button>
+                                    </div>
                                 </div>
-                                <div class="flip-card-back">
-                                    <h3 class="member-name">B. Shree Shreyas Raj</h3>
-                                    <div class="member-role">Team Lead</div>
-                                    <p class="member-bio">Mechanical design architect, strategic operations commander, and project manager.</p>
+                            </div>
+                            <!-- Unrolling Scroll -->
+                            <div class="skill-scroll">
+                                <div class="skill-list">
+                                    <span class="skill-tag">SolidWorks</span>
+                                    <span class="skill-tag">Fusion 360</span>
+                                    <span class="skill-tag">FEA Analysis</span>
+                                    <span class="skill-tag">Rapid Prototyping</span>
+                                    <span class="skill-tag">Strategic Planning</span>
+                                    <span class="skill-tag">Project Management</span>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </section>
@@ -945,27 +1048,31 @@
                         <div class="terminal-body">
                             <h3 class="t-sub" style="margin-bottom:30px">Join The Corps</h3>
                             <form id="recruitmentForm" onsubmit="handleRecruitment(event)">
+                                <input type="hidden" name="access_key" value="e946335b-b44b-45c2-806d-a230190f2105">
+                                <input type="hidden" name="subject" value="New Recruit Application">
+                                
                                 <div class="form-group">
                                     <label class="form-label">Codename / Name</label>
-                                    <input type="text" class="form-input" id="name" required autocomplete="off">
+                                    <input type="text" class="form-input" name="name" id="name" required autocomplete="off">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Email Address</label>
-                                    <input type="email" class="form-input" id="email" required autocomplete="off">
+                                    <input type="email" class="form-input" name="email" id="email" required autocomplete="off">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Phone Number</label>
-                                    <input type="text" class="form-input" id="phone" placeholder="+91 XXXXX XXXXX" required autocomplete="off">
+                                    <input type="text" class="form-input" name="phone" id="phone" placeholder="+91 XXXXX XXXXX" required autocomplete="off">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Bio / Technical Skills</label>
-                                    <textarea class="form-input" id="bio" rows="2" required autocomplete="off"></textarea>
+                                    <textarea class="form-input" name="bio" id="bio" rows="2" required autocomplete="off"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mission Objective (Why Join?)</label>
-                                    <textarea class="form-input" id="motivation" rows="2" required autocomplete="off"></textarea>
+                                    <textarea class="form-input" name="motivation" id="motivation" rows="2" required autocomplete="off"></textarea>
                                 </div>
                                 
+                                <!-- Captcha Field -->
                                 <div class="form-group">
                                     <label class="form-label">Security Verification</label>
                                     <div class="captcha-wrapper">
@@ -990,7 +1097,7 @@
                     <button class="btn-glitch" onclick="toggleModal(true)">Sponsor Us</button>
                 </div>
                 <div class="team-info">
-                    <p>&copy; <strong>Arkadeep Nag & B. Shree Shreyas Raj</strong></p>
+                    <p>Presented by: <strong>B. Shree Shreyas Raj</strong></p>
                     <p>&copy; 2026 ORESHNK Robotics</p>
                 </div>
             </footer>
@@ -1095,12 +1202,7 @@
             e.preventDefault();
             const statusEl = document.getElementById('form-status');
             const userCaptcha = document.getElementById('captcha-input').value.toUpperCase();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const bio = document.getElementById('bio').value;
-            const motivation = document.getElementById('motivation').value;
-
+            
             // 1. Captcha Check
             if (userCaptcha !== captchaCode) {
                 statusEl.textContent = "ERR: SECURITY CODE MISMATCH";
@@ -1109,9 +1211,10 @@
                 return;
             }
 
-            // 2. Regex Validation
+            // 2. Client-side Validation (Regex)
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            // Matches 10 digits or +91 followed by 10 digits
             const phoneRegex = /^(\+91[\-\s]?)?[6789]\d{9}$/; 
 
             if (!emailRegex.test(email)) {
@@ -1126,10 +1229,9 @@
                 return;
             }
 
-            // 3. CAPTURE IP & PREPARE PAYLOAD
+            // 3. CAPTURE IP (Optional)
             statusEl.textContent = "ACQUIRING NETWORK COORDINATES...";
             statusEl.className = "status-msg";
-
             let userIP = 'UNKNOWN';
             try {
                 const ipRes = await fetch('https://api.ipify.org?format=json');
@@ -1137,67 +1239,67 @@
                     const ipData = await ipRes.json();
                     userIP = ipData.ip;
                 }
-            } catch (err) {
-                console.warn("IP Lookup Failed:", err);
-            }
+            } catch (err) { console.warn("IP Lookup Failed"); }
 
-            // OPTION 3: GITHUB REPOSITORY DISPATCH
-            // WARNING: Storing a GitHub Token in client-side HTML is insecure.
-            // Use a proxy server or serverless function (like Option 1) for production.
-            
-            const GITHUB_OWNER = 'Team-Oreshnk'; 
-            const GITHUB_REPO = 'oreshnk';
-            const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-// Needs 'repo' scope
-
-            const newRecruit = {
-                name: name,
-                email: email,
-                phone: phone,
-                bio: bio,
-                motivation: motivation,
-                ip_address: userIP,
-                timestamp: new Date().toISOString()
-            };
-
+            // 4. PREPARE FORM DATA FOR WEB3FORMS
             statusEl.textContent = "INITIATING ENCRYPTED UPLINK...";
             statusEl.className = "status-msg";
-            
-            console.log("READY FOR UPLOAD:", JSON.stringify(newRecruit, null, 2));
 
-            fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/dispatches`, {
+            const formData = new FormData(e.target);
+            formData.append("ip_address", userIP); // Add IP manually
+            formData.append("timestamp", new Date().toISOString());
+
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
+
+            // 5. SEND TO WEB3FORMS (Serverless / No-Code Backend)
+            fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    event_type: 'new_recruit',
-                    client_payload: newRecruit
-                })
+                body: json
             })
-            .then(response => {
-                if (response.ok) {
+            .then(async (response) => {
+                const json = await response.json();
+                if (response.status == 200) {
                     statusEl.textContent = "SUCCESS: DATA TRANSMITTED TO HQ.";
                     statusEl.className = "status-msg success";
                     e.target.reset();
                     generateCaptcha();
                 } else {
-                    // Fallback for demo purposes if GitHub creds aren't set
-                    console.error('GitHub Error:', response.statusText);
-                    statusEl.textContent = "SUCCESS: DATA LOGGED LOCALLY (CHECK CONSOLE).";
-                    statusEl.className = "status-msg success";
+                    console.log(response);
+                    statusEl.textContent = "ERR: UPLINK FAILED (Check Access Key)";
+                    statusEl.className = "status-msg error";
                 }
             })
             .catch(error => {
-                console.error('Network Error:', error);
-                statusEl.textContent = "SUCCESS: DATA LOGGED LOCALLY (CHECK CONSOLE)."; // Fallback for demo
-                statusEl.className = "status-msg success";
+                console.log(error);
+                statusEl.textContent = "ERR: NETWORK DISCONNECTED.";
+                statusEl.className = "status-msg error";
             });
         }
 
-        // --- 4. SMOOTH SCROLL (LENIS) ---
+        // --- 4. SKILLS TOGGLE ---
+        function toggleSkills(btn) {
+            const wrapper = btn.closest('.member-wrapper');
+            const scroll = wrapper.querySelector('.skill-scroll');
+            const card = wrapper.querySelector('.flip-card');
+            
+            // Toggle
+            scroll.classList.toggle('active');
+            card.classList.toggle('locked');
+            
+            // Update Text
+            if(scroll.classList.contains('active')) {
+                btn.innerHTML = "RETRACT DATA ▲";
+            } else {
+                btn.innerHTML = "ACCESS SKILLSET ▼";
+            }
+        }
+
+        // --- 5. SMOOTH SCROLL (LENIS) ---
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -1215,7 +1317,7 @@
         }
         requestAnimationFrame(raf);
 
-        // --- 5. GSAP ANIMATIONS ---
+        // --- 6. GSAP ANIMATIONS ---
         gsap.registerPlugin(ScrollTrigger);
 
         // Skew effect on scroll
@@ -1274,7 +1376,7 @@
             });
         });
 
-        // --- 6. THREE.JS ROBOT & LINE FOLLOWER ---
+        // --- 7. THREE.JS ROBOT & LINE FOLLOWER ---
         const canvas = document.querySelector('#webgl-canvas');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x050505, 0.03);
